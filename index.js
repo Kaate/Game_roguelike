@@ -15,6 +15,9 @@ const count_tileE = 10;
 let fieldState = new Array(field_height * field_weight)
 let personLocations = new Map();
 
+
+let rendered = false;
+
 class Game {
     init() {
         createField();
@@ -188,6 +191,7 @@ function createField() {
     putItem('tileSW', count_tileSW);
     
     fillInnerState();
+    rendered = true;
 }
 
 function fillWalls() {
@@ -259,6 +263,7 @@ function restartPersons() {
 }
 
 function restartGame() {
+    rendered = false; 
     createField();
     updateStatistic('health', hero.getHealth())
     updateStatistic('power', hero.getPower())
@@ -277,7 +282,10 @@ function checkHeroAlive(hero) {
         console.log("a")
         alert ("Вы проиграли. Попробуйте заново");
         restartGame()
+        return false;
     }
+
+    return true;
 }
 
 function checkFeild(i, j) {
@@ -312,12 +320,12 @@ function checkHeroItem(i, j) {
 
 function checkAllEnemiesIsDead(arrEnemies) {
     let countDeadEnemies = 0;
-        for (let enemy of arrEnemies) {
-            if (!personLocations.has(enemy)) countDeadEnemies++;
-        }
-        updateStatistic('alive_enemy', arrEnemies.length - countDeadEnemies)
-        if (countDeadEnemies == arrEnemies.length) return true;
-        else return false;
+    for (let enemy of arrEnemies) {
+        if (!personLocations.has(enemy)) countDeadEnemies++;
+    }
+    updateStatistic('alive_enemy', arrEnemies.length - countDeadEnemies)
+    if (countDeadEnemies == arrEnemies.length) return true;
+    else return false;
 }
 
 /* ------------------    КОНЕЦ ПРОВЕРОК ------------------------------- */ 
@@ -336,7 +344,7 @@ function deleteItem(key, i = -1, j= -1) {
         tmp.classList.remove(key.getClass())
 
         if (checkAllEnemiesIsDead(arrEnemies)) {
-            alert("ВЫ ВЫЙГРАЛИ");
+            alert("ВЫ ВЫИГРАЛИ");
             restartGame();
         }
     } else {
@@ -375,7 +383,7 @@ function updatePersonHealth(key) {
 
 function enemyFight(idxs) {
     const move_choise = [[-1, 0], [0, -1], [1, 0], [0, 1]];
-    for (let choise of move_choise){
+    for (let choise of move_choise) {
         let tmp_i = idxs[0] + choise[0];
         let tmp_j = idxs[1] + choise[1];
         if (checkFeild(tmp_i, tmp_j)) {
@@ -417,7 +425,9 @@ function renderEnemy() {
             let [tmp_i, tmp_j] = enemyFight(val);
             if (tmp_i != -1 && tmp_j != -1) {
                 hero.setHealth(-key.getPower());
-                checkHeroAlive(hero);
+                if (!checkHeroAlive(hero)) {
+                    return;
+                }
                 updatePersonHealth(hero);
                 updateStatistic('health', hero.getHealth());
             }
@@ -504,7 +514,10 @@ window.addEventListener('keydown', function(event) {
 
 
 (function IterationFunction () {
-    renderEnemy();
+    
+    if (rendered && (!checkAllEnemiesIsDead(arrEnemies) || checkHeroAlive(hero))) {
+        renderEnemy();
+    } 
     setTimeout(IterationFunction, 300);
 })();
 
