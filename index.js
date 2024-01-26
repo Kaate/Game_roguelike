@@ -486,6 +486,7 @@ window.addEventListener('keydown', function(event) {
             movePerson(hero, [i, j], [newi, j]);
         }
     } else if (event.keyCode == 32) {
+        event.preventDefault();
         const move_choise = [[-1, 0], [0, -1], [1, 0], [0, 1]];
         for (let choise of move_choise) {
             let tmp_i = i + choise[0];
